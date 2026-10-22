@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 RAW = "https://raw.githubusercontent.com/TheMostLocal"
 UA = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36 valuatio-credit"}
-SUFFIX = re.compile(r"\b(THE|INCORPORATED|INC|CORPORATION|CORP|COMPANY|CO|LIMITED|LTD|PLC|LLC|LP|L P|N V|NV|S A|SA|AG|SE|HOLDINGS?|GROUP|"
+SUFFIX = re.compile(r"\b(THE|INCORPORATED|INC|CORPORATION|CORP|COMPANY|CO|LIMITED|LTD|PLC|P L C|LLC|LP|L P|N V|NV|S A|SA|AG|SE|HOLDINGS?|GROUP|"
                     r"CLASS [A-C]|CL [A-C]|COMMON STOCK|ORDINARY SHARES|ADR|ADS|DEL|NEW)\b")
 
 
@@ -102,7 +102,7 @@ def issuers():
     return out
 
 
-def match_entity(entity, by_norm):
+def match_entity(entity, by_norm, min_len=4):
     """Reference-entity name -> ticker: exact normalized match, else the longest company name the
     entity starts with ('FORD MOTOR CREDIT' -> FORD MOTOR -> F), so finance subsidiaries land on
     their parent with the entity's own name kept."""
@@ -113,7 +113,7 @@ def match_entity(entity, by_norm):
         return by_norm[n]
     best = None
     for k, t in by_norm.items():
-        if len(k) >= 4 and n.startswith(k + " ") and (best is None or len(k) > len(best[0])):
+        if len(k) >= min_len and n.startswith(k + " ") and (best is None or len(k) > len(best[0])):
             rest = n[len(k) + 1:].split()
             # only finance arms ("FORD MOTOR CREDIT", "GENERAL MOTORS FINANCIAL"), never another business
             if rest and all(w in FIN_SUB for w in rest) and (any(w in FIN_STRONG for w in rest) or rest == ["FINANCIAL"]):
@@ -122,4 +122,5 @@ def match_entity(entity, by_norm):
 
 
 FIN_STRONG = {"CREDIT", "FINANCE", "FUNDING", "CAPITAL", "TREASURY"}
-FIN_SUB = {"CREDIT", "FINANCE", "FINANCIAL", "CAPITAL", "FUNDING", "SERVICES", "AMERICA", "USA", "US", "INTERNATIONAL", "HOLDING", "TREASURY", "NORTH"}
+FIN_SUB = {"CREDIT", "FINANCE", "FINANCIAL", "CAPITAL", "FUNDING", "SERVICES", "AMERICA", "USA", "US", "INTERNATIONAL", "HOLDING", "TREASURY", "NORTH",
+           "MARKETS"}                                   # z146: "BP CAPITAL MARKETS" - BP's financing arm
