@@ -20,6 +20,10 @@ on:
         description: 'CDS days to (re)read'
         required: false
         default: '5'
+      bonds_batch:
+        description: 'Companies whose bond lists to (re)build this run (1000 = all of them, ~2 h)'
+        required: false
+        default: '150'
 
 concurrency:
   group: credit-data
@@ -47,7 +51,7 @@ jobs:
     needs: gate
     if: needs.gate.outputs.run == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 50
+    timeout-minutes: 240
     permissions:
       contents: write
     steps:
@@ -62,12 +66,13 @@ jobs:
         continue-on-error: true
       - name: Bonds (OpenFIGI list + FINRA TRACE probe)
         env:
+          BONDS_BATCH: ${{ github.event.inputs.bonds_batch || '150' }}
           OPENFIGI_API_KEY: ${{ secrets.OPENFIGI_API_KEY }}
           FINRA_CLIENT_ID: ${{ secrets.FINRA_CLIENT_ID }}
           FINRA_CLIENT_SECRET: ${{ secrets.FINRA_CLIENT_SECRET }}
         run: python pipeline/fetch_bonds.py
         continue-on-error: true
-        timeout-minutes: 30
+        timeout-minutes: 210
       - name: Index
         run: python pipeline/build_credit_index.py
       - name: Commit & push (start from the latest main)
