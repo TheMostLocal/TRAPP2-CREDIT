@@ -30,7 +30,9 @@ def main():
                        "avgCoupon": round(sum(cp) / len(cp), 3) if cp else None, "wall": wall}
     for t, c in ci.items():
         out.setdefault(t, {"name": c.get("name"), "bonds": 0})["cds"] = {k: c.get(k) for k in ("entity", "bps5y", "bps5yDate", "chg1w", "chg1m", "n30", "lastDate")}
-    write(DATA / "credit_index.json", {"asOf": now_iso(), "cdsAsOf": cds.get("asOf"), "tickers": out})
+    prog = read(DATA / "bonds" / "_progress.json", {}) or {}             # z146: how far the bond lists have got
+    write(DATA / "credit_index.json", {"asOf": now_iso(), "cdsAsOf": cds.get("asOf"), "tickers": out,
+                                       "bondsProgress": {k: prog.get(k) for k in ("issuers", "checked", "withBonds", "updatedAt")}})
     log("index", f"{len(out)} companies · {sum(1 for v in out.values() if v.get('bonds'))} with bonds · {sum(1 for v in out.values() if v.get('cds'))} with CDS trades")
     return 0
 
