@@ -27,7 +27,7 @@ from credit_common import DATA, http, issuers, log, match_entity, norm_name, now
 
 OUT = DATA / "bonds"
 KEY = os.environ.get("OPENFIGI_API_KEY", "").strip()
-BATCH = int(os.environ.get("BONDS_BATCH", "60" if KEY else "15"))
+BATCH = int(os.environ.get("BONDS_BATCH") or ("150" if KEY else "20"))   # z146: 150 a day with a key; a manual run can do all
 PAUSE = 3.2 if KEY else 12.5                 # 20 / min with a key, 5 / min without
 REFRESH_D = 14
 TICK = re.compile(r"\s(\d+(?:\.\d+)?|\d+\s\d/\d|FLT|V\d)\s+(\d{2})/(\d{2})/(\d{2})\b")
@@ -57,16 +57,36 @@ def parse_desc(desc):
         return coupon, None
 
 
-def figi_search(query):
-    out, nxt = [], None
-    for _ in range(4):
-        body = {"query": query, "marketSecDes": "Corp"}
-        if nxt:
-            body["start"] = nxt
-        h = {"Content-Type": "application/json"}
-        if KEY:
-            h["X-OPENFIGI-APIKEY"] = KEY
-        doc = json.loads(http("https://api.openfigi.com/v3/search", data=json.dumps(body).encode(), headers=h, timeout=60).decode())
+MAX_PAGES = int(os.environ.get("BONDS_MAX_PAGES", "6"))
+
+
+def _figi(endpoint, body):
+    h = {"Content-Type": "application/json"}
+    if KEY:
+        h["X-OPENFIGI-APIKEY"] = KEY
+    doc = json.loads(http(f"https://api.openfigi.com/v3/{endpoint}", data=json.dumps(body).encode(), headers=h, timeout=60).decode())
+    if isinstance(doc, dict) and doc.get("error"):
+        raise RuntimeError(f"OpenFIGI: {doc['error']}")
+    return doc
+
+
+def figi_pages(query, live_only=True):
+    """z146: OpenFIGI's FILTER endpoint (every match, not a relevance top-list) for corporate bonds,
+    asking for maturities from today on when the API accepts it - big issuers have thousands of matured
+    notes that used to fill the 4 pages before a live bond appeared (Bank of America, Boeing, CSX came
+    back with 0). Falls back to SEARCH without the maturity filter if FILTER refuses the request."""
+    body = {"query": query, "marketSecDes": "Corp"}
+    if live_only:
+        body.update({"securityType2": "Corp", "maturity": [date.today().isoformat(), "2199-12-31"]})
+    out, nxt, endpoint = [], None, ("filter" if live_only else "search")
+    for _ in range(MAX_PAGES):
+        b = dict(body, **({"start": nxt} if nxt else {}))
+        try:
+            doc = _figi(endpoint, b)
+        except Exception as e:
+            if live_only and not out and ("400" in str(e) or "maturity" in str(e).lower() or "securityType2" in str(e)):
+                return figi_pages(query, live_only=False)
+            raise
         out += doc.get("data") or []
         nxt = doc.get("next")
         time.sleep(PAUSE)
@@ -75,27 +95,39 @@ def figi_search(query):
     return out
 
 
-def bonds_for(ticker, info, by_norm):
-    rows = figi_search(info["name"])
+def bonds_for(ticker, info):
+    """The company's live bonds. A result is the company's when Bloomberg's bond-ticker root is the
+    company's ticker (e.g. "BA 5.15 05/01/30") OR its issuer name is the company's own or its finance
+    arm's - judged against THIS company only (no clash with another listing of a similar name).
+    Query by ticker first (precise), by name only if that found nothing."""
     today = date.today().isoformat()
+    root0 = ticker.split("-")[0].split(".")[0]
+    roots = {ticker, root0, {"GOOGL": "GOOG", "GOOG": "GOOGL", "BRK-B": "BRK"}.get(ticker, ticker)}
+    own = {info["norm"]: ticker}
     seen, bonds = set(), []
-    roots = {ticker, ticker.split("-")[0], {"GOOGL": "GOOG", "GOOG": "GOOGL", "BRK-B": "BRK"}.get(ticker, ticker)}
-    for r in rows:
-        if match_entity(r.get("name") or "", by_norm) != ticker:
-            continue                                   # another issuer that merely shares a word
-        if str(r.get("ticker") or "").split(" ")[0] not in roots:
-            continue                                   # Bloomberg's bond ticker root must be the company's own
-        cpn, mat = parse_desc(r.get("ticker"))
-        if not mat or mat < today:
-            continue
-        key = (cpn, mat)
-        if key in seen:
-            continue
-        seen.add(key)
-        bonds.append({"figi": r.get("figi"), "desc": r.get("ticker"), "issuer": r.get("name"), "coupon": cpn, "maturity": mat,
-                      "type": r.get("securityType") or r.get("securityType2")})
+    stat = {"results": 0, "other": 0, "matured": 0}
+    for q in (root0, info["name"]):
+        rows = figi_pages(q)
+        stat["results"] += len(rows)
+        for r in rows:
+            root = str(r.get("ticker") or "").split(" ")[0]
+            if root not in roots and match_entity(r.get("name") or "", own, min_len=2) != ticker:   # one company only: short names (BP) are safe
+                stat["other"] += 1
+                continue
+            cpn, mat = parse_desc(r.get("ticker"))
+            if not mat or mat < today:
+                stat["matured"] += 1
+                continue
+            key = (cpn, mat)
+            if key in seen:
+                continue
+            seen.add(key)
+            bonds.append({"figi": r.get("figi"), "desc": r.get("ticker"), "issuer": r.get("name"), "coupon": cpn, "maturity": mat,
+                          "type": r.get("securityType") or r.get("securityType2")})
+        if bonds:
+            break
     bonds.sort(key=lambda b: b["maturity"])
-    return bonds
+    return bonds, stat
 
 
 # ---------------------------------------------------------------- FINRA TRACE (probe, then prices)
@@ -144,14 +176,18 @@ def main():
     order = sorted(iss, key=lambda t: (t not in cds, t))         # names with CDS trading first
     todo = [t for t in order if stale(t)][:BATCH]
     log("bonds", f"{len(iss)} issuers · {len(todo)} to refresh this run (batch {BATCH}, OpenFIGI key {'set' if KEY else 'not set'})")
-    ok = 0
+    ok = nb = 0
     for t in todo:
         try:
-            b = bonds_for(t, iss[t], by_norm)
-            write(OUT / "issuers" / f"{t}.json", {"ticker": t, "name": iss[t]["name"], "bonds": b, "source": "OpenFIGI", "updatedAt": now_iso()})
+            b, st = bonds_for(t, iss[t])
+            write(OUT / "issuers" / f"{t}.json", {"ticker": t, "name": iss[t]["name"], "bonds": b, "source": "OpenFIGI", "updatedAt": now_iso(),
+                                                  "searched": st})
             ok += 1
+            nb += 1 if b else 0
             if b:
                 log("bonds", f"{t}: {len(b)} bonds ({b[0]['desc']} … {b[-1]['desc']})")
+            else:
+                log("bonds", f"{t}: none outstanding · {st['results']} results ({st['other']} another issuer, {st['matured']} matured)")
         except Exception as e:
             log("bonds", f"{t}: {e}")
             if "429" in str(e):
@@ -161,7 +197,11 @@ def main():
         finra_probe()
     except Exception as e:
         log("trace", f"probe failed: {e}")
-    log("bonds", f"refreshed {ok}")
+    files = list((OUT / "issuers").glob("*.json"))
+    have = sum(1 for p in files if (read(p) or {}).get("bonds"))
+    write(OUT / "_progress.json", {"updatedAt": now_iso(), "issuers": len(iss), "checked": len(files), "withBonds": have,
+                                   "thisRun": {"refreshed": ok, "withBonds": nb, "batch": BATCH}})
+    log("bonds", f"refreshed {ok} ({nb} with bonds) · checked {len(files)} of {len(iss)} companies so far · {have} with bonds")
     return 0
 
 
