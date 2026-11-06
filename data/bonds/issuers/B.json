@@ -1,1 +1,1 @@
-{"ticker":"B","name":"Barrick Mining Corporation","bonds":[],"source":"OpenFIGI","updatedAt":"2026-10-22T23:25:25Z"}
+{"ticker":"B","name":"Barrick Mining Corporation","bonds":[{"figi":"BBG0000GYQS8","desc":"B 3.375 03/15/27 144A","issuer":"BARNES GROUP INC","coupon":3.375,"maturity":"2027-03-15","type":"PRIV PLACEMENT"},{"figi":"BBG01R6JP2N4","desc":"B 6.75 02/01/32 144A","issuer":"GOAT HOLDCO LLC","coupon":6.75,"maturity":"2032-02-01","type":"PRIV PLACEMENT"}],"source":"OpenFIGI","updatedAt":"2026-11-06T19:39:24Z","searched":{"results":600,"other":596,"matured":0}}

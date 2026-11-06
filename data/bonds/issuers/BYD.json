@@ -1,1 +1,1 @@
-{"ticker":"BYD","name":"Boyd Gaming Corporation","bonds":[],"source":"OpenFIGI","updatedAt":"2026-10-22T23:27:07Z"}
+{"ticker":"BYD","name":"Boyd Gaming Corporation","bonds":[{"figi":"BBG00QX4CT73","desc":"BYD 4.75 12/01/27 144A","issuer":"BOYD GAMING CORP","coupon":4.75,"maturity":"2027-12-01","type":"PRIV PLACEMENT"},{"figi":"BBG0116YL9Q4","desc":"BYD 4.75 06/15/31 144A","issuer":"BOYD GAMING CORP","coupon":4.75,"maturity":"2031-06-15","type":"PRIV PLACEMENT"}],"source":"OpenFIGI","updatedAt":"2026-11-06T19:41:38Z","searched":{"results":9,"other":4,"matured":0}}
