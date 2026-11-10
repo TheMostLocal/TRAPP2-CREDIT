@@ -78,7 +78,7 @@ def norm_name(s):
 def issuers():
     """{TICKER: {name, norm, sector}} - the books' US-listed stocks and the S&P 500 members."""
     out = {}
-    for b in ("TRAPP2", "TRAPP2-1", "TRAPP2-2", "TRAPP2-3"):
+    for b in ("TRAPP2", "TRAPP2-1", "TRAPP2-2", "TRAPP2-3", "TRAPP2-4"):   # z180: + TRAPP2-4 (~1,600 NYSE companies)
         try:
             rows = json.loads(http(f"{RAW}/{b}/main/data/master.json").decode())
             rows = rows if isinstance(rows, list) else (rows.get("rows") or [])
