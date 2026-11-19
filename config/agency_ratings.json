@@ -1,0 +1,4 @@
+{
+  "_note": "z194 - OPTIONAL real agency ratings (long-term issuer credit ratings). A company listed here is rated by its agencies, not the model: several agencies average on the notch scale (S&P / Fitch letters like AA-, Moody's like Aa3). The model's own rating stays on the record ('model') with the gap - a model far below the agencies is an early warning. Leave empty to run on the model alone. Example line inside ratings: \"AAPL\": {\"sp\": \"AA+\", \"moodys\": \"Aaa\", \"fitch\": null, \"asOf\": \"2026-11-01\"}",
+  "ratings": {}
+}
