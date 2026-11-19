@@ -2,7 +2,7 @@
 #  >>> DESTINATION: TheMostLocal/TRAPP2-CREDIT   (new repo, z139)
 #  >>> FILE PATH:   .github/workflows/credit.yml
 #
-#  CORPORATE BONDS & SINGLE-NAME CDS, daily at 0730 ET (DTCC's cumulative file for the previous
+#  CORPORATE BONDS & SINGLE-NAME CDS, then CREDIT RATINGS (z194), daily at 0730 ET (DTCC's cumulative file for the previous
 #  UTC day is complete by then). GitHub cron is UTC: listed for EDT and EST, the gate keeps the
 #  0730 ET run. Secrets (Settings → Secrets and variables → Actions):
 #    OPENFIGI_API_KEY      optional, free (openfigi.com) - 4x faster bond lists
@@ -75,6 +75,10 @@ jobs:
         timeout-minutes: 210
       - name: Index
         run: python pipeline/build_credit_index.py
+      - name: Credit ratings (companies, funds, futures, FX)     # z194 -> data/ratings.json (the bot and the app read it)
+        run: python pipeline/build_ratings.py
+        continue-on-error: true
+        timeout-minutes: 30
       - name: Commit & push (start from the latest main)
         run: |
           git config user.name "valuatio-credit"
