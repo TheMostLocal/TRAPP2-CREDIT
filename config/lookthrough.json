@@ -57,7 +57,7 @@
     "AMZU": {"stock": "AMZN", "lev": 2}, "MSFD": {"stock": "MSFT", "lev": -1}, "MSTU": {"stock": "MSTR", "lev": 2},
     "NVDD": {"stock": "NVDA", "lev": -1}, "NVDL": {"stock": "NVDA", "lev": 2}, "NVDU": {"stock": "NVDA", "lev": 2},
     "TSLL": {"stock": "TSLA", "lev": 2}, "TSLQ": {"stock": "TSLA", "lev": -2}, "BABO": {"stock": "BABA", "proxy": "covered-call income on BABA"},
-    "SNK": {"stockName": "SpaceX", "lev": -2},
+    "SNK": {"stock": "SPCX", "lev": -2},
     "EWC": {"sov": "Canada"}, "EWG": {"sov": "Germany"}, "EWI": {"sov": "Italy"}, "EWJ": {"sov": "Japan"}, "EWQ": {"sov": "France"},
     "EWW": {"sov": "Mexico"}, "EWY": {"sov": "South Korea"}, "EWZ": {"sov": "Brazil"}, "FXI": {"sov": "China"}, "MCHI": {"sov": "China"},
     "INDA": {"sov": "India"}, "EWU": {"sov": "United Kingdom"}, "EWA": {"sov": "Australia"}, "EWT": {"sov": "Taiwan"},
