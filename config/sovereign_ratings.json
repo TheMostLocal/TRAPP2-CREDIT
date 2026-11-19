@@ -1,0 +1,56 @@
+{
+  "_note": "z194 - S&P Global long-term foreign-currency sovereign ratings, as listed by Trading Economics (tradingeconomics.com/country-list/rating), read 2026-11-18. Edit a line when S&P acts (the rating, not the outlook, is what the model uses). null = not rated / withdrawn. Used for: Treasury futures and funds (United States), country funds and foreign indices, FX legs, the ceiling on a foreign company's rating, and the bank / insurer anchor outside the US.",
+  "asOf": "2026-11-18",
+  "source": "S&P Global Ratings via Trading Economics",
+  "ratings": {
+    "Australia": "AAA", "Canada": "AAA", "Denmark": "AAA", "Germany": "AAA", "Liechtenstein": "AAA", "Luxembourg": "AAA",
+    "Netherlands": "AAA", "Norway": "AAA", "Switzerland": "AAA", "Sweden": "AAA", "Singapore": "AAA",
+    "European Union": "AA+", "New Zealand": "AA+", "United States": "AA+", "Austria": "AA+", "Finland": "AA+", "Ireland": "AA+",
+    "Taiwan": "AA+", "Hong Kong": "AA+",
+    "Qatar": "AA", "United Arab Emirates": "AA", "United Kingdom": "AA", "South Korea": "AA", "Slovenia": "AA",
+    "Czech Republic": "AA-", "Belgium": "AA-", "Kuwait": "AA-",
+    "France": "A+", "Iceland": "A+", "Saudi Arabia": "A+", "Bermuda": "A+", "China": "A+", "Japan": "A+", "Portugal": "A+", "Spain": "A+",
+    "Lithuania": "A", "Chile": "A", "Cyprus": "A", "Latvia": "A", "Slovakia": "A", "Croatia": "A", "Israel": "A", "Andorra": "A",
+    "Malta": "A-", "Poland": "A-", "Malaysia": "A-", "San Marino": "A-",
+    "Italy": "BBB+", "Bulgaria": "BBB+", "Thailand": "BBB+", "Philippines": "BBB+", "Uruguay": "BBB+", "Aruba": "BBB+",
+    "Indonesia": "BBB", "Kazakhstan": "BBB", "Mexico": "BBB", "Greece": "BBB", "India": "BBB",
+    "Botswana": "BBB-", "Peru": "BBB-", "Hungary": "BBB-", "Romania": "BBB-", "Oman": "BBB-", "Panama": "BBB-", "Paraguay": "BBB-",
+    "Morocco": "BBB-", "Serbia": "BBB-", "Trinidad and Tobago": "BBB-",
+    "Guatemala": "BB+", "Vietnam": "BB+",
+    "Brazil": "BB", "Georgia": "BB", "Costa Rica": "BB", "Dominican Republic": "BB", "Ivory Coast": "BB", "South Africa": "BB",
+    "Uzbekistan": "BB", "Albania": "BB", "Jamaica": "BB",
+    "Colombia": "BB-", "Macedonia": "BB-", "Armenia": "BB-", "Turkey": "BB-", "Bahamas": "BB-", "Jordan": "BB-", "Honduras": "BB-",
+    "Benin": "BB-", "Mongolia": "BB-", "Moldova": "BB-", "Nicaragua": "BB-",
+    "Montenegro": "B+", "Fiji": "B+", "Guinea": "B+", "Bangladesh": "B+", "Rwanda": "B+", "Cape Verde": "B+", "Barbados": "B+",
+    "Kyrgyzstan": "B+", "Tajikistan": "B+", "Togo": "B+", "Bosnia and Herzegovina": "B+",
+    "Bahrain": "B", "Nigeria": "B", "Egypt": "B", "Kenya": "B", "Pakistan": "B", "Ecuador": "B",
+    "Papua New Guinea": "B-", "Uganda": "B-", "Angola": "B-", "Cameroon": "B-", "Chad": "B-", "Congo": "B-", "El Salvador": "B-",
+    "Ghana": "B-", "Madagascar": "B-", "Iraq": "B-", "Belize": "B-", "Argentina": "B-", "Burkina Faso": "B-", "Suriname": "B-",
+    "Laos": "B-",
+    "Zambia": "CCC+", "Sri Lanka": "CCC+", "Republic of the Congo": "CCC+", "Bolivia": "CCC+", "Ukraine": "CCC+",
+    "Mozambique": "CCC", "Senegal": "CC",
+    "Ethiopia": "SD", "Lebanon": "SD", "Grenada": "SD", "Puerto Rico": "D",
+    "Russia": null, "Belarus": null, "Estonia": null, "Venezuela": null
+  },
+  "aliases": {
+    "USA": "United States", "US": "United States", "U.S.": "United States", "UK": "United Kingdom", "Great Britain": "United Kingdom",
+    "Korea": "South Korea", "Republic of Korea": "South Korea", "Korea, Republic of": "South Korea", "Türkiye": "Turkey",
+    "Czechia": "Czech Republic", "UAE": "United Arab Emirates", "Hong Kong SAR": "Hong Kong", "Cote d'Ivoire": "Ivory Coast",
+    "North Macedonia": "Macedonia", "Euro area": "Euro Area", "Eurozone": "Euro Area"
+  },
+  "composites": {
+    "_note": "GDP weights (rounded) - the euro is rated as its members' WARF blend.",
+    "Euro Area": {"Germany": 0.28, "France": 0.20, "Italy": 0.15, "Spain": 0.11, "Netherlands": 0.07, "Belgium": 0.04,
+                  "Ireland": 0.04, "Austria": 0.03, "Portugal": 0.02, "Finland": 0.02, "Greece": 0.015, "Slovakia": 0.01,
+                  "Croatia": 0.006, "Lithuania": 0.005, "Slovenia": 0.004, "Luxembourg": 0.006, "Latvia": 0.003, "Cyprus": 0.002, "Malta": 0.001}
+  },
+  "currencies": {
+    "USD": "United States", "EUR": "Euro Area", "JPY": "Japan", "GBP": "United Kingdom", "CHF": "Switzerland", "CAD": "Canada",
+    "AUD": "Australia", "NZD": "New Zealand", "CNY": "China", "CNH": "China", "HKD": "Hong Kong", "SGD": "Singapore",
+    "KRW": "South Korea", "TWD": "Taiwan", "INR": "India", "IDR": "Indonesia", "MYR": "Malaysia", "PHP": "Philippines",
+    "THB": "Thailand", "VND": "Vietnam", "BRL": "Brazil", "MXN": "Mexico", "CLP": "Chile", "COP": "Colombia", "PEN": "Peru",
+    "ARS": "Argentina", "ZAR": "South Africa", "TRY": "Turkey", "HUF": "Hungary", "PLN": "Poland", "CZK": "Czech Republic",
+    "SEK": "Sweden", "NOK": "Norway", "DKK": "Denmark", "ISK": "Iceland", "ILS": "Israel", "EGP": "Egypt", "SAR": "Saudi Arabia",
+    "AED": "United Arab Emirates", "QAR": "Qatar", "KWD": "Kuwait", "RUB": "Russia", "NGN": "Nigeria", "KES": "Kenya", "PKR": "Pakistan"
+  }
+}
