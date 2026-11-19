@@ -109,7 +109,7 @@ def parse(rows):
             elif 1 <= pv <= 3000:
                 bps = pv                                     # an unlabeled price in the spread range
         out.append({"entity": ent, "entityId": (r.get(c["eid"]) or "").strip() if c["eid"] else "", "ts": ts, "date": ts[:10],
-                    "tenor": tenor, "bps": round(bps, 2) if bps is not None and 0 < bps < 5000 else None, "upfront": upf,
+                    "tenor": tenor, "bps": (lambda b: b if b is not None and b < 5000 else None)(norm_bps(bps)), "upfront": upf,
                     "notional": num(r.get(c["notional"])) if c["notional"] else None,
                     "ccy": (r.get(c["ccy"]) or "").strip() if c["ccy"] else "",
                     "id": (r.get(c["id"]) or "").strip() if c["id"] else "", "orig": (r.get(c["orig"]) or "").strip() if c["orig"] else "",
@@ -117,6 +117,21 @@ def parse(rows):
     # cancellations remove what they cancel
     cancelled = {t["orig"] or t["id"] for t in out if t["action"].startswith("CANC") or t["action"] == "TERM"}
     return [t for t in out if not (t["action"].startswith("CANC") or t["action"] == "TERM") and t["id"] not in cancelled]
+
+
+def norm_bps(x):
+    """z194: the tape quotes a 5-year spread in basis points - or as a percentage (0.60 = 60 bp; MS, INTC, APA,
+    OXY printed both ways, so a day's median mixed 60 and 0.6). No real corporate / sovereign 5-year spread is
+    under 5 bp: below that it is a percentage."""
+    if x is None:
+        return None
+    try:
+        x = float(x)
+    except (TypeError, ValueError):
+        return None
+    if x <= 0:
+        return None
+    return round(x * 100, 2) if x < 5 else x
 
 
 def med(v):
@@ -158,12 +173,14 @@ def main():
                 doc["trades"].append({k: t[k] for k in ("date", "ts", "entity", "tenor", "bps", "upfront", "notional", "ccy", "id")})
                 if t["entity"] not in doc["entities"]:
                     doc["entities"].append(t["entity"])
+        for x in doc["trades"]:                       # z194: heal the stored tape (percent-quoted prints)
+            x["bps"] = norm_bps(x.get("bps"))
         doc["trades"].sort(key=lambda x: x.get("ts") or "")
         doc["trades"] = doc["trades"][-400:]
         days_ = {}
         for x in doc["trades"]:
             days_.setdefault(x["date"], []).append(x)
-        daily = {d["date"]: d for d in doc.get("daily") or []}
+        daily = {d["date"]: dict(d, bps5y=norm_bps(d.get("bps5y")), bpsAll=norm_bps(d.get("bpsAll"))) for d in doc.get("daily") or []}
         for dd, xs in days_.items():
             five = [x["bps"] for x in xs if x.get("bps") is not None and x.get("tenor") is not None and 4.0 <= x["tenor"] <= 6.0]
             daily[dd] = {"date": dd, "n": len(xs), "notional": round(sum((x.get("notional") or 0) for x in xs), 0),
